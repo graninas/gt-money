@@ -1,0 +1,74 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.33.0.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: fa5f59773339f17c2fdd24b7729e13bcb5ffdb9574e4f166688b784ad3349cff
+
+name:           gt-money
+version:        0.0.0.1
+homepage:       https://github.com/graninas/gt-money#readme
+bug-reports:    https://github.com/graninas/gt-money/issues
+author:         Alexander Granin
+maintainer:     graninas@gmail.com
+copyright:      Granin A.S. 2020
+license:        BSD3
+build-type:     Simple
+
+source-repository head
+  type: git
+  location: https://github.com/graninas/gt-money
+
+library
+  exposed-modules:
+      Money.Raw.Money
+      Money.TypeSafe.Money
+  other-modules:
+      Paths_gt_money
+  hs-source-dirs:
+      src
+  default-extensions: GADTs RankNTypes DeriveFunctor DeriveGeneric OverloadedStrings LambdaCase MultiParamTypeClasses ExplicitNamespaces TypeApplications ScopedTypeVariables TypeOperators TypeFamilies DataKinds FlexibleContexts FlexibleInstances PatternSynonyms PolyKinds DefaultSignatures ConstraintKinds NamedFieldPuns TupleSections ViewPatterns MultiWayIf RecordWildCards
+  ghc-options: -Wall
+  build-depends:
+      base >=4.7 && <5
+    , bytestring
+    , containers
+    , free
+    , mtl
+    , newtype-generics
+    , scientific
+    , template-haskell
+    , text
+    , time
+    , transformers
+    , uuid
+  default-language: Haskell2010
+
+test-suite functional-tests
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Money.RawMoneySpec
+      Money.TypeSafeMoneySpec
+      Paths_gt_money
+  hs-source-dirs:
+      test/
+  default-extensions: GADTs RankNTypes DeriveFunctor DeriveGeneric OverloadedStrings LambdaCase MultiParamTypeClasses ExplicitNamespaces TypeApplications ScopedTypeVariables TypeOperators TypeFamilies DataKinds FlexibleContexts FlexibleInstances PatternSynonyms PolyKinds DefaultSignatures ConstraintKinds NamedFieldPuns TupleSections ViewPatterns MultiWayIf RecordWildCards
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+    , bytestring
+    , containers
+    , free
+    , gt-money
+    , hspec
+    , mtl
+    , newtype-generics
+    , scientific
+    , template-haskell
+    , text
+    , time
+    , transformers
+    , uuid
+  default-language: Haskell2010
