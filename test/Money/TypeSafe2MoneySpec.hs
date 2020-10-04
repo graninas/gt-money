@@ -1,7 +1,7 @@
-module Money.TypeSafeMoneySpec where
+module Money.TypeSafe2MoneySpec where
 
 import qualified Money.Raw.Money as RM
-import qualified Money.TypeSafe.Money as TS
+import qualified Money.TypeSafe2.Money as TS
 
 import           Test.Hspec
 

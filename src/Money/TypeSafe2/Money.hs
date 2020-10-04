@@ -1,4 +1,4 @@
-module Money.TypeSafe.Money where
+module Money.TypeSafe2.Money where
 
 import qualified Money.Raw.Money as RM
 
@@ -11,7 +11,7 @@ import qualified Money.Raw.Money as RM
 -- Currency
 -- UX
 
--- Opt 1, open design
+-- Opt 2
 
 data TSMoney cur = TSMoney RM.Money
   deriving (Show, Read, Eq, Ord)

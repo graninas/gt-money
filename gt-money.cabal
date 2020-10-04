@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: fa5f59773339f17c2fdd24b7729e13bcb5ffdb9574e4f166688b784ad3349cff
+-- hash: 63fddbf6b3709f3e9e079d694f35875f9dbf7d69b22711c170fc9e9b2524d57b
 
 name:           gt-money
 version:        0.0.0.1
@@ -23,7 +23,8 @@ source-repository head
 library
   exposed-modules:
       Money.Raw.Money
-      Money.TypeSafe.Money
+      Money.TypeSafe1.Money
+      Money.TypeSafe2.Money
   other-modules:
       Paths_gt_money
   hs-source-dirs:
@@ -50,7 +51,8 @@ test-suite functional-tests
   main-is: Spec.hs
   other-modules:
       Money.RawMoneySpec
-      Money.TypeSafeMoneySpec
+      Money.TypeSafe1MoneySpec
+      Money.TypeSafe2MoneySpec
       Paths_gt_money
   hs-source-dirs:
       test/
