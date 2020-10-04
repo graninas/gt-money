@@ -28,25 +28,26 @@ instance TS.Currency "USD"
 
 spec :: Spec
 spec =
-  describe "Money" $ do
-    it "Simple operations" $ do
+  describe "Type safe money, approach 1 (phantom type)" $ do
+    it "Creation & addition" $ do
       let m1 = RM.Money 4
       let m2 = RM.Money 6
       let m3 = RM.add m1 m2
       m3 `shouldBe` RM.Money 10
 
-    let convEurUsd = Converter @"EUR" @"USD" $ \m -> TS.convWithRate m 10
-    let convUsdEur = Converter @"USD" @"EUR" $ \m -> TS.convWithRate m 2
+    describe "Conversion tests" $ do
+      let convEurUsd = Converter @"EUR" @"USD" $ \m -> TS.convWithRate m 10
+      let convUsdEur = Converter @"USD" @"EUR" $ \m -> TS.convWithRate m 2
 
-    it "Total EUR -> USD" $ do
-      total <- getTotalAmount convEurUsd (TS.mkTSMoney @"EUR" $ RM.mkMoney 10)  (TS.mkTSMoney @"USD" $ RM.mkMoney 5)
-      total `shouldBe` (TS.mkTSMoney @"USD" $ RM.mkMoney 105)
+      it "Total EUR -> USD" $ do
+        total <- getTotalAmount convEurUsd (TS.mkTSMoney @"EUR" $ RM.mkMoney 10)  (TS.mkTSMoney @"USD" $ RM.mkMoney 5)
+        total `shouldBe` (TS.mkTSMoney @"USD" $ RM.mkMoney 105)
 
--- wont compile, conv is Converter "EUR" "USD", not vice versa
-    -- it "Total USD -> EUR" $ do
-    --   total <- getTotalAmount convEurUsd (TS.mkTSMoney @"USD" $ RM.mkMoney 10)  (TS.mkTSMoney @"EUR" $ RM.mkMoney 5)
-    --   total `shouldBe` (TS.mkTSMoney @"EUR" $ RM.mkMoney 105)
+  -- wont compile, conv is Converter "EUR" "USD", not vice versa
+      -- it "Total USD -> EUR" $ do
+      --   total <- getTotalAmount convEurUsd (TS.mkTSMoney @"USD" $ RM.mkMoney 10)  (TS.mkTSMoney @"EUR" $ RM.mkMoney 5)
+      --   total `shouldBe` (TS.mkTSMoney @"EUR" $ RM.mkMoney 105)
 
-    it "Total USD -> EUR" $ do
-      total <- getTotalAmount convUsdEur (TS.mkTSMoney @"USD" $ RM.mkMoney 10)  (TS.mkTSMoney @"EUR" $ RM.mkMoney 5)
-      total `shouldBe` (TS.mkTSMoney @"EUR" $ RM.mkMoney 25)
+      it "Total USD -> EUR" $ do
+        total <- getTotalAmount convUsdEur (TS.mkTSMoney @"USD" $ RM.mkMoney 10)  (TS.mkTSMoney @"EUR" $ RM.mkMoney 5)
+        total `shouldBe` (TS.mkTSMoney @"EUR" $ RM.mkMoney 25)

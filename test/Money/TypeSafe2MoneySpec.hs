@@ -5,48 +5,62 @@ import qualified Money.TypeSafe2.Money as TS
 
 import           Test.Hspec
 
-
-data Converter cur1 cur2 where
-  Converter
-   :: (TS.TSMoney cur1 -> TS.TSMoney cur2)
-   -> Converter cur1 cur2
-
--- * Stacking not possible with this design.
-getTotalAmount
+getTotalAmountBroken
   :: TS.Currency cur1
   => TS.Currency cur2
-  => Converter cur1 cur2
-  -> TS.TSMoney cur1
+  => TS.TSMoney cur1
   -> TS.TSMoney cur2
-  -> IO (TS.TSMoney cur2)
-getTotalAmount (Converter f) tsm1 tsm2 = do
-  let tsm1' = f tsm1
-  pure $ TS.add tsm1' tsm2
+  -> TS.TSMoney cur2
+getTotalAmountBroken tsm1 tsm2 =
+  TS.add (TS.conv 10 tsm1) tsm2   -- raw add can't be used here
+
+getTotalAmountInterpretable
+  :: TS.Currency cur1
+  => TS.Currency cur2
+  => TS.TSMoney cur1
+  -> TS.TSMoney cur2
+  -> TS.TSMoney cur2
+getTotalAmountInterpretable tsm1 tsm2 =
+  TS.add' (TS.conv 10 tsm1) tsm2
 
 instance TS.Currency "EUR"
 instance TS.Currency "USD"
 
 spec :: Spec
 spec =
-  describe "Money" $ do
-    it "Simple operations" $ do
-      let m1 = RM.Money 4
-      let m2 = RM.Money 6
-      let m3 = RM.add m1 m2
-      m3 `shouldBe` RM.Money 10
+  describe "Type safe money, approach 2 (GADTs)" $ do
+    it "Creation" $ do
+      let tsm1 = TS.mkTSMoney @"EUR" $ RM.mkMoney 4
+      let tsm2 = TS.mkTSMoney @"USD" $ RM.mkMoney 4
 
-    let convEurUsd = Converter @"EUR" @"USD" $ \m -> TS.convWithRate m 10
-    let convUsdEur = Converter @"USD" @"EUR" $ \m -> TS.convWithRate m 2
+      case (tsm1, tsm2) of
+        (TS.MkTSMoney m1, TS.MkTSMoney m2) -> m1 `shouldBe` m2
+        _ -> error "Test failed."
 
-    it "Total EUR -> USD" $ do
-      total <- getTotalAmount convEurUsd (TS.mkTSMoney @"EUR" $ RM.mkMoney 10)  (TS.mkTSMoney @"USD" $ RM.mkMoney 5)
-      total `shouldBe` (TS.mkTSMoney @"USD" $ RM.mkMoney 105)
+    it "Addition" $ do
+      let tsm1 = TS.mkTSMoney @"EUR" $ RM.mkMoney 4
+      let tsm2 = TS.mkTSMoney @"EUR" $ RM.mkMoney 4
+      let tsm3 = TS.add tsm1 tsm2
 
--- wont compile, conv is Converter "EUR" "USD", not vice versa
-    -- it "Total USD -> EUR" $ do
-    --   total <- getTotalAmount convEurUsd (TS.mkTSMoney @"USD" $ RM.mkMoney 10)  (TS.mkTSMoney @"EUR" $ RM.mkMoney 5)
-    --   total `shouldBe` (TS.mkTSMoney @"EUR" $ RM.mkMoney 105)
+      case tsm3 of
+        TS.MkTSMoney m -> m `shouldBe` RM.Money 8
+        _ -> error "Test failed."
 
-    it "Total USD -> EUR" $ do
-      total <- getTotalAmount convUsdEur (TS.mkTSMoney @"USD" $ RM.mkMoney 10)  (TS.mkTSMoney @"EUR" $ RM.mkMoney 5)
-      total `shouldBe` (TS.mkTSMoney @"EUR" $ RM.mkMoney 25)
+-- Won't compile
+    -- it "Addition types mismatch" $ do
+    --   let tsm1 = TS.mkTSMoney @"EUR" $ RM.mkMoney 4
+    --   let tsm2 = TS.mkTSMoney @"USD" $ RM.mkMoney 4
+    --   let tsm3 = TS.add tsm1 tsm2
+    --   case tsm3 of
+    --     TS.MkTSMoney m -> m `shouldBe` RM.Money 8
+    --     _ -> error "Test failed."
+
+    describe "Conversion tests" $ do
+
+      let tsm1 = TS.mkTSMoney @"EUR" $ RM.mkMoney 10
+      let tsm2 = TS.mkTSMoney @"USD" $ RM.mkMoney 5
+
+      it "Total EUR -> USD" $ do
+        let total = getTotalAmountInterpretable tsm1 tsm2
+        let m = TS.runTSMoney total
+        m `shouldBe` RM.Money 105

@@ -22,6 +22,9 @@ class Currency cur
 mkTSMoney :: Currency cur => RM.Money -> TSMoney cur
 mkTSMoney = TSMoney
 
+zero :: Currency cur => TSMoney cur
+zero = mkTSMoney RM.zero
+
 
 add :: Currency cur => TSMoney cur -> TSMoney cur -> TSMoney cur
 add (TSMoney m1) (TSMoney m2) = TSMoney $ RM.add m1 m2
@@ -34,6 +37,3 @@ convWithRate
   -> Int
   -> TSMoney cur2
 convWithRate (TSMoney m1) v = mkTSMoney $ RM.mul m1 v
-
-zero :: Currency cur => TSMoney cur
-zero = mkTSMoney RM.zero
