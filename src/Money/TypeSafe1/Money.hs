@@ -13,11 +13,15 @@ import qualified Money.Raw.Money as RM
 
 -- Opt 1, open design
 
-data TSMoney cur = TSMoney RM.Money
-  deriving (Show, Read, Eq, Ord)
+-- Open Currency category. Any type can be a currency.
 
 class Currency cur
 
+-- Allows nonsense currencies
+-- instance TS.Currency Bool
+
+data TSMoney cur = TSMoney RM.Money
+  deriving (Show, Read, Eq, Ord)
 
 mkTSMoney :: Currency cur => RM.Money -> TSMoney cur
 mkTSMoney = TSMoney

@@ -12,7 +12,7 @@ getTotalAmountBroken
   -> TS.TSMoney cur2
   -> TS.TSMoney cur2
 getTotalAmountBroken tsm1 tsm2 =
-  TS.add (TS.conv 10 tsm1) tsm2   -- raw add can't be used here
+  TS.add (TS.conv 10 tsm1) tsm2      -- raw add can't be used here
 
 getTotalAmountInterpretable
   :: TS.Currency cur1
@@ -39,11 +39,11 @@ spec =
 
     it "Addition" $ do
       let tsm1 = TS.mkTSMoney @"EUR" $ RM.mkMoney 4
-      let tsm2 = TS.mkTSMoney @"EUR" $ RM.mkMoney 4
+      let tsm2 = TS.mkTSMoney @"EUR" $ RM.mkMoney 5
       let tsm3 = TS.add tsm1 tsm2
 
       case tsm3 of
-        TS.MkTSMoney m -> m `shouldBe` RM.Money 8
+        TS.MkTSMoney m -> m `shouldBe` RM.Money 9
         _ -> error "Test failed."
 
 -- Won't compile

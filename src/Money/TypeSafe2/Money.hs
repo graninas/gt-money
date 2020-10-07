@@ -5,7 +5,12 @@ import qualified Money.Raw.Money as RM
 
 -- Opt 2, GADTs
 
+-- Open Currency category. Any type can be a currency.
+
 class Currency cur
+
+-- Allows nonsense currencies
+-- instance TS.Currency Bool
 
 data TSMoney a where
 
@@ -29,6 +34,7 @@ data TSMoney a where
     -> TSMoney cur1
     -> TSMoney cur2
 
+  -- Requires manual instances
   -- deriving (Show, Read, Eq, Ord)
 
 
