@@ -3,7 +3,8 @@ module Money.TypeSafe3.Money where
 import qualified Money.Raw.Money as RM
 
 
--- Opt 3, Associated types and type families
+-- Opt 3, Associated types and type families.
+--  This design is open. You can add your own currencies when you want.
 
 -- Note: I'm constantly forgetting the syntax of Type Families.
 
