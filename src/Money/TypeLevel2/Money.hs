@@ -36,7 +36,7 @@ data Currency = USD | EUR
 -- type EUR :: Currency
 
 
-data EnglishAuction holder exchangeService lots
+data EnglishAuction holder exchangeService (lots :: [ LotTag ])
 
 data Holder name
 
@@ -48,13 +48,18 @@ data ExchangeService name
 --   type 'AcceptTag (of kind AcceptTag)
 data AcceptTag = AcceptTag
 
+data LotTag = LotTag
+
+
 -- A way to produce list of types of a predefined kind
 -- (We produce list of types of kind AcceptTag).
 
 -- This can be a base trick for all the type level eDSLs.
-data Lot (name :: Symbol) (descr :: Symbol) (accepts :: [ AcceptTag ] )
+
 
 -- Accept :: Currency -> AcceptTag
+-- A way to produce something of AcceptTag kind.
+--
 -- This is an opened Type Family, but we can't add a new currency because
 -- we're limited by the closed data type Currency.
 -- So this type family cannot be considered 'opened' in the extensibility sense,
@@ -64,6 +69,11 @@ type family Accept (a :: Currency) :: AcceptTag
 type instance Accept 'USD = 'AcceptTag
 type instance Accept 'EUR = 'AcceptTag
 
+
+type family Lot (name :: Symbol) (descr :: Symbol) (accepts :: [ AcceptTag ]) :: LotTag
+
+
+
 -- Question: can Accept 'USD and Acceept 'EUR be distinguished on interpreting?
 
 
@@ -71,9 +81,9 @@ type Auctions =
   EnglishAuction
     ( Holder "UK Bank" )
     ( ExchangeService "UK Bank" )
-    ( Lot "a" "b" (Accept 'USD ': Accept 'EUR ': '[])
-    -- ': Lot "302" "Dali picture" (Accept 'USD ': Accept 'EUR ': '[])
-    -- ': Lot "403" "Ancient mechanism"  (Accept 'USD ': '[])
+    (  Lot "a" "b" (Accept 'USD ': Accept 'EUR ': '[])
+    ': Lot "302" "Dali picture" (Accept 'USD ': Accept 'EUR ': '[])
+    ': Lot "403" "Ancient mechanism" (Accept 'USD ': '[])
     ': '[]
     )
 
