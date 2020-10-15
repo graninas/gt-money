@@ -11,7 +11,9 @@ import qualified Money.Raw.Money as RM
 -- Currency
 -- UX
 
--- Opt 1, open design
+-- Opt 1, open design.
+-- cur type var is not limited by anything. It allows things like
+--   TSMoney Bool
 
 data TSMoney cur = TSMoney RM.Money
   deriving (Show, Read, Eq, Ord)

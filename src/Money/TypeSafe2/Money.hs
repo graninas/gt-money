@@ -4,10 +4,14 @@ import qualified Money.Raw.Money as RM
 
 
 -- Opt 2, GADTs
+-- currency type variable is not limited, but the constructors have constraints.
+-- It's possible to declare a type synonym
+--    type TSMBool = TSMoney Bool
+-- But impossible to create a value of this type (if there is no instance of Currency for Bool)
 
 class Currency cur
 
-data TSMoney a where
+data TSMoney currency where
 
   MkTSMoney
     :: forall cur
