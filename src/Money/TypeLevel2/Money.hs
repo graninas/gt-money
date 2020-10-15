@@ -11,29 +11,13 @@ import           Data.Typeable (Typeable)
 import           GHC.TypeLits (Symbol)
 
 
--- | Capture a value from the request path under a certain type @a@.
---
--- Example:
---
--- >>>            -- GET /books/:isbn
--- >>> type MyApi = "books" :> Capture "isbn" Text :> Get '[JSON] Book
-type Capture = Capture' '[] -- todo
-
--- | 'Capture' which can be modified. For example with 'Description'.
-data Capture' (mods :: [*]) (sym :: Symbol) (a :: *)
-    deriving (Typeable)
-
-
--- class Currency cur
---
--- data USD
--- data EUR
-
 data Currency = USD | EUR
 
 -- kind Currency
 -- type USD :: Currency
+-- type 'USD :: Currency
 -- type EUR :: Currency
+-- type 'EUR :: Currency
 
 
 data EnglishAuction holder exchangeService (lots :: [ LotTag ])
@@ -72,9 +56,7 @@ type instance Accept 'EUR = 'AcceptTag
 
 type family Lot (name :: Symbol) (descr :: Symbol) (accepts :: [ AcceptTag ]) :: LotTag
 
-
-
--- Question: can Accept 'USD and Acceept 'EUR be distinguished on interpreting?
+-- Question: can Accept 'USD and Accept 'EUR be distinguished on interpreting?
 
 
 type Auctions =
