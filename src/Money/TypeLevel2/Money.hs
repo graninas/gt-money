@@ -2,10 +2,12 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE PolyKinds          #-}
 {-# LANGUAGE TypeInType         #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 module Money.TypeLevel2.Money where
 
-
+import           Data.Map (Map)
+import           Data.Proxy (Proxy(..))
 
 import           Data.Typeable (Typeable)
 import           GHC.TypeLits (Symbol)
@@ -38,12 +40,57 @@ type family Accept (a :: *) :: AcceptTag
 
 type family Lot (name :: Symbol) (descr :: Symbol) (accepts :: [ AcceptTag ]) :: LotTag
 
+-- Type safe currency
+
+class Currency cur
+
+-- Implementation
+
+class Eval dsl payload res where
+  eval :: Proxy dsl -> Proxy payload -> IO res
+
+instance Eval AcceptTag accepts (Map Name Amount) => Eval LotTag accepts (Map Name Amount) where
+  eval = undefined
+
+type SomeLot = Lot "a" "b" (Accept USD ': Accept EUR ': '[])
+
+
+instance (a ~ Accept b, Currency b) => Eval a b () where
+  eval _ _ = pure ()
+
+-- doesn't work: duplicated instances
+-- instance (a ~ Accept USD) => Eval a () () where
+--   eval _ _ = pure ()
+--
+-- instance (a ~ Accept EUR) => Eval a () () where
+--   eval _ _ = pure ()
+
+someFunc :: IO ()
+someFunc = eval (Proxy :: Proxy (Accept EUR)) (Proxy :: Proxy EUR)
+
+-- instance Eval accepts (Map Name Amount) => Eval (Lot name descr accepts) (Map Name Amount) where
+--   eval = undefined
+--
+-- instance Eval lots (Map Name Amount) => Eval (EnglishAuction holder exch lots) AuctionsResult where
+--   eval = undefined
+
+type Name = String
+type Amount = Integer
+data AuctionsResult = AuctionsResult
+  { sold :: Map Name Amount
+  }
+
+-- runAuctions :: Proxy Auctions -> IO AuctionsResult
+-- runAuctions aus = eval aus
 
 
 -- User space
 
 data USD
 data EUR
+
+-- Finely composable with a type safe approach
+instance Currency EUR
 
 -- Question: can Accept USD and Accept EUR be distinguished on interpreting?
 
@@ -56,3 +103,10 @@ type Auctions =
     ': Lot "403" "Ancient mechanism" (Accept USD ': '[])
     ': '[]
     )
+
+
+
+-- Idea: separation of type safe interpretation and liberal (not type safe) eDSL definition.
+-- eDSL definition: allows extensions, doesn't restrict on extension points.
+-- Interpretatoin: restricts the extension points.
+-- See currency.
