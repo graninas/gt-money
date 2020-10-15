@@ -44,23 +44,21 @@ data ExchangeService name
 
 data Accept' (cur :: Currency)
 
-
--- This doesn't work.
---    Expected kind ‘[Accept' cur0]’,
---        but ‘Accept 'USD : '[]’ has kind ‘[*]’
-
-data Lot' (name :: Symbol) (descr :: Symbol) (accepts :: [ Accept' (cur :: Currency) ])
+-- This allows to specify too much stuff.
+data Lot' (name :: Symbol) (descr :: Symbol) (accepts :: [ * ])
 
 
 type Lot = Lot'
 type Accept = Accept'
+
+data Nonsense
 
 
 type Auctions =
   EnglishAuction
     ( Holder "UK Bank" )
     ( ExchangeService "UK Bank" )
-    (  Lot "201" "Chinesse vase" ( Accept 'USD ': '[])
+    (  Lot "201" "Chinesse vase" ( Accept 'USD ': Nonsense ': '[])
     -- ': Lot "302" "Dali picture" (Accept 'USD ': Accept 'EUR ': '[])
     -- ': Lot "403" "Ancient mechanism"  (Accept 'USD ': '[])
     ': '[]
