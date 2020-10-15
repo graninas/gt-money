@@ -1,10 +1,10 @@
 {-# LANGUAGE DataKinds          #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE PolyKinds          #-}
+{-# LANGUAGE TypeInType         #-}
 
 module Money.TypeLevel2.Money where
 
-import qualified Money.Raw.Money as RM
 
 
 import           Data.Typeable (Typeable)
@@ -36,32 +36,41 @@ data Currency = USD | EUR
 -- type EUR :: Currency
 
 
-data EnglishAuction holder exchangeService lots
+data EnglishAuction holder exchangeService lots lots2
 
 data Holder name
 
 data ExchangeService name
 
-data Accept' (cur :: Currency)
+data Accept (cur :: Currency)
+data Accept2 = Accept2
 
--- This allows to specify too much stuff.
-data Lot' (name :: Symbol) (descr :: Symbol) (accepts :: [ * ])
+data Lot (name :: Symbol) (descr :: Symbol) (accepts :: [ Currency ] )
 
+-- A way to produce list of types of a predefined kind
+-- (We produce list of types of kind Accept2).
 
-type Lot = Lot'
-type Accept = Accept'
+-- This can be a base trick for all the type level eDSLs.
+data Lot2 (name :: Symbol) (descr :: Symbol) (accepts :: [ Accept2 ] )
 
-data Nonsense
+-- AcceptTF :: Currency -> Accept2
+type family AcceptTF (a :: Currency) :: Accept2
+
+type instance AcceptTF 'USD = 'Accept2
+type instance AcceptTF 'EUR = 'Accept2
 
 
 type Auctions =
   EnglishAuction
     ( Holder "UK Bank" )
     ( ExchangeService "UK Bank" )
-    (  Lot "201" "Chinesse vase" ( Accept 'USD ': Nonsense ': '[])
+    ( Lot "201" "Chinesse vase" ( 'USD ': '[] )
     -- ': Lot "302" "Dali picture" (Accept 'USD ': Accept 'EUR ': '[])
     -- ': Lot "403" "Ancient mechanism"  (Accept 'USD ': '[])
     ': '[]
+    )
+
+    ( Lot2 "a" "b" (AcceptTF 'USD ': AcceptTF 'EUR ': '[])
     )
 
 
