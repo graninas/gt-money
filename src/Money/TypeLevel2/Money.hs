@@ -26,52 +26,30 @@ data AcceptTag = AcceptTag
 
 data LotTag = LotTag
 
-data CurrencyTag = CurrencyTag
-
 -- A way to produce list of types of a predefined kind
 -- (We produce list of types of kind AcceptTag).
 --
 -- This can be a base trick for all the type level eDSLs.
---
---
--- Accept :: CurrencyTag -> AcceptTag
--- A way to produce something of AcceptTag kind.
---
--- This is an opened Type Family which accepts any type with a kind CurrencyTag.
--- A type cannot be made of the kind CurrencyTag explicitly (unless there is some trik in GHC),
--- but a type family Currency can produce such tag.
--- It's an open type family, so we can add our own currencies.
--- However we should now construct the AcceptTag as Accept (Currency USD). This doesn't work:
--- type instance Accept (Currency USD) = 'AcceptTag
 
--- Unfortunately, it allows nonsense: Accept (Currency Bool)
+-- This design allows nonsense: Accept Bool.
+-- We defer checking to the interpretation phase.
 
-type family Accept (a :: CurrencyTag) :: AcceptTag
-
-type family Currency (a :: *) :: CurrencyTag
+type family Accept (a :: *) :: AcceptTag
 
 type family Lot (name :: Symbol) (descr :: Symbol) (accepts :: [ AcceptTag ]) :: LotTag
 
-data USD = USD
-data EUR = EUR
+data USD
+data EUR
 
 
-type instance Currency USD = 'CurrencyTag
-type instance Currency EUR = 'CurrencyTag
-
-type instance Accept a = 'AcceptTag
-
-
--- Question: can Accept 'USD and Accept 'EUR be distinguished on interpreting?
+-- Question: can Accept USD and Accept EUR be distinguished on interpreting?
 
 type Auctions =
   EnglishAuction
     ( Holder "UK Bank" )
     ( ExchangeService "UK Bank" )
-
-    -- Nonsense
-    (  Lot "a" "b" (Accept (Currency USD) ': Accept (Currency EUR) ': Accept (Currency Bool) ': '[])
-    ': Lot "302" "Dali picture" (Accept (Currency USD) ': Accept (Currency EUR) ': '[])
-    ': Lot "403" "Ancient mechanism" (Accept (Currency USD) ': '[])
+    (  Lot "a" "b" (Accept USD ': Accept EUR ': '[])
+    ': Lot "302" "Dali artwork" (Accept USD ': Accept EUR ': '[])
+    ': Lot "403" "Ancient mechanism" (Accept USD ': '[])
     ': '[]
     )
