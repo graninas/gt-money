@@ -28,6 +28,9 @@ data LotTag = LotTag
 
 data CurrencyTag = CurrencyTag
 
+data MkCurrencyTag = MkCurrencyTag
+
+
 -- A way to produce list of types of a predefined kind
 -- (We produce list of types of kind AcceptTag).
 --
@@ -44,34 +47,35 @@ data CurrencyTag = CurrencyTag
 -- However we should now construct the AcceptTag as Accept (Currency USD). This doesn't work:
 -- type instance Accept (Currency USD) = 'AcceptTag
 
--- Unfortunately, it allows nonsense: Accept (Currency Bool)
+type family MkCurrency (a :: *) :: MkCurrencyTag
+
+type family Currency (a :: MkCurrencyTag) :: CurrencyTag
 
 type family Accept (a :: CurrencyTag) :: AcceptTag
-
-type family Currency (a :: *) :: CurrencyTag
 
 type family Lot (name :: Symbol) (descr :: Symbol) (accepts :: [ AcceptTag ]) :: LotTag
 
 data USD = USD
 data EUR = EUR
+data UsdTag = UsdTag
+data EurTag = EurTag
 
 
-type instance Currency USD = 'CurrencyTag
-type instance Currency EUR = 'CurrencyTag
+-- type instance Currency (MkCurrency EUR) = 'CurrencyTag
 
 type instance Accept a = 'AcceptTag
 
 
 -- Question: can Accept 'USD and Accept 'EUR be distinguished on interpreting?
 
-type Auctions =
-  EnglishAuction
-    ( Holder "UK Bank" )
-    ( ExchangeService "UK Bank" )
-
-    -- Nonsense
-    (  Lot "a" "b" (Accept (Currency USD) ': Accept (Currency EUR) ': Accept (Currency Bool) ': '[])
-    ': Lot "302" "Dali picture" (Accept (Currency USD) ': Accept (Currency EUR) ': '[])
-    ': Lot "403" "Ancient mechanism" (Accept (Currency USD) ': '[])
-    ': '[]
-    )
+-- type Auctions =
+--   EnglishAuction
+--     ( Holder "UK Bank" )
+--     ( ExchangeService "UK Bank" )
+--
+--     -- Nonsense
+--     (  Lot "a" "b" (Accept (Currency USD) ': Accept (Currencies EUR) ': Accept (Currencies Bool) ': '[])
+--     -- ': Lot "302" "Dali picture" (Accept (Currency USD) ': Accept (Currency EUR) ': '[])
+--     -- ': Lot "403" "Ancient mechanism" (Accept (Currency USD) ': '[])
+--     ': '[]
+--     )
