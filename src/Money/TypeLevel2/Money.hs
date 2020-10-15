@@ -11,14 +11,6 @@ import           Data.Typeable (Typeable)
 import           GHC.TypeLits (Symbol)
 
 
-data Currency = USD | EUR
-
--- kind Currency
--- type USD :: Currency
--- type 'USD :: Currency
--- type EUR :: Currency
--- type 'EUR :: Currency
-
 
 data EnglishAuction holder exchangeService (lots :: [ LotTag ])
 
@@ -34,38 +26,49 @@ data AcceptTag = AcceptTag
 
 data LotTag = LotTag
 
+data CurrencyTag = CurrencyTag
 
 -- A way to produce list of types of a predefined kind
 -- (We produce list of types of kind AcceptTag).
-
+--
 -- This can be a base trick for all the type level eDSLs.
-
-
--- Accept :: Currency -> AcceptTag
+--
+--
+-- Accept :: CurrencyTag -> AcceptTag
 -- A way to produce something of AcceptTag kind.
 --
--- This is an opened Type Family, but we can't add a new currency because
--- we're limited by the closed data type Currency.
--- So this type family cannot be considered 'opened' in the extensibility sense,
--- only in the syntactical sense.
-type family Accept (a :: Currency) :: AcceptTag
+-- This is an opened Type Family which accepts any type with a kind CurrencyTag.
+-- A type cannot be made of the kind CurrencyTag explicitly (unless there is some trik in GHC),
+-- but a type family Currency can produce such tag.
+-- It's an open type family, so we can add our own currencies.
+-- However we should now construct the AcceptTag as Accept (Currency USD). This doesn't work:
+-- type instance Accept (Currency USD) = 'AcceptTag
 
-type instance Accept 'USD = 'AcceptTag
-type instance Accept 'EUR = 'AcceptTag
+type family Accept (a :: CurrencyTag) :: AcceptTag
 
+type family Currency (a :: *) :: CurrencyTag
 
 type family Lot (name :: Symbol) (descr :: Symbol) (accepts :: [ AcceptTag ]) :: LotTag
 
--- Question: can Accept 'USD and Accept 'EUR be distinguished on interpreting?
+data USD = USD
+data EUR = EUR
 
+
+type instance Currency USD = 'CurrencyTag
+type instance Currency EUR = 'CurrencyTag
+
+type instance Accept a = 'AcceptTag
+
+
+-- Question: can Accept 'USD and Accept 'EUR be distinguished on interpreting?
 
 type Auctions =
   EnglishAuction
     ( Holder "UK Bank" )
     ( ExchangeService "UK Bank" )
-    (  Lot "a" "b" (Accept 'USD ': Accept 'EUR ': '[])
-    ': Lot "302" "Dali picture" (Accept 'USD ': Accept 'EUR ': '[])
-    ': Lot "403" "Ancient mechanism" (Accept 'USD ': '[])
+    (  Lot "a" "b" (Accept (Currency USD) ': Accept (Currency EUR) ': '[])
+    ': Lot "302" "Dali picture" (Accept (Currency USD) ': Accept (Currency EUR) ': '[])
+    ': Lot "403" "Ancient mechanism" (Accept (Currency USD) ': '[])
     ': '[]
     )
 
