@@ -14,9 +14,9 @@ import           GHC.TypeLits (Symbol)
 
 data EnglishAuction holder exchangeService (lots :: [ LotTag ])
 
-data Holder name
+data Holder (name :: Symbol)
 
-data ExchangeService name
+data ExchangeService (name :: Symbol)
 
 -- This data type generates implicitly:
 --   kind AcceptTag
@@ -38,9 +38,12 @@ type family Accept (a :: *) :: AcceptTag
 
 type family Lot (name :: Symbol) (descr :: Symbol) (accepts :: [ AcceptTag ]) :: LotTag
 
+
+
+-- User space
+
 data USD
 data EUR
-
 
 -- Question: can Accept USD and Accept EUR be distinguished on interpreting?
 
