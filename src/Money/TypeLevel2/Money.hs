@@ -44,6 +44,8 @@ data CurrencyTag = CurrencyTag
 -- However we should now construct the AcceptTag as Accept (Currency USD). This doesn't work:
 -- type instance Accept (Currency USD) = 'AcceptTag
 
+-- Unfortunately, it allows nonsense: Accept (Currency Bool)
+
 type family Accept (a :: CurrencyTag) :: AcceptTag
 
 type family Currency (a :: *) :: CurrencyTag
@@ -66,16 +68,10 @@ type Auctions =
   EnglishAuction
     ( Holder "UK Bank" )
     ( ExchangeService "UK Bank" )
-    (  Lot "a" "b" (Accept (Currency USD) ': Accept (Currency EUR) ': '[])
+
+    -- Nonsense
+    (  Lot "a" "b" (Accept (Currency USD) ': Accept (Currency EUR) ': Accept (Currency Bool) ': '[])
     ': Lot "302" "Dali picture" (Accept (Currency USD) ': Accept (Currency EUR) ': '[])
     ': Lot "403" "Ancient mechanism" (Accept (Currency USD) ': '[])
     ': '[]
     )
-
-
-
-
---- What does this code mean??
--- type family AcceptTF a
--- data Lot' (name :: Symbol) (descr :: Symbol) (accepts :: [ AcceptTF * ])
--- type instance AcceptTF (Accept' USD) = ()
