@@ -3,11 +3,13 @@ module Money.Raw.Money where
 
 
 -- Questions:
--- Precision
--- Parsing
--- Overflow and underflow
--- Currency
--- UX
+-- - Precision
+-- - Parsing
+-- - Overflow and underflow
+-- - Currency
+-- - UX
+-- - What is interface and implementation?
+-- - What is implementation details?
 
 
 
@@ -27,6 +29,8 @@ zero :: Money
 zero = Money 0
 
 -- Opt 1
+
+-- Closed currency category. Only this type can be a currency, with a limited set of currencies.
 
 data Currency
   = EUR

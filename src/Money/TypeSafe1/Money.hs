@@ -15,11 +15,15 @@ import qualified Money.Raw.Money as RM
 -- cur type var is not limited by anything. It allows things like
 --   TSMoney Bool
 
-data TSMoney cur = TSMoney RM.Money
-  deriving (Show, Read, Eq, Ord)
+-- Open Currency category. Any type can be a currency.
 
 class Currency cur
 
+-- Allows nonsense currencies
+-- instance TS.Currency Bool
+
+data TSMoney cur = TSMoney RM.Money
+  deriving (Show, Read, Eq, Ord)
 
 mkTSMoney :: Currency cur => RM.Money -> TSMoney cur
 mkTSMoney = TSMoney

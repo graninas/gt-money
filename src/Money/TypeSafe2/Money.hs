@@ -9,9 +9,14 @@ import qualified Money.Raw.Money as RM
 --    type TSMBool = TSMoney Bool
 -- But impossible to create a value of this type (if there is no instance of Currency for Bool)
 
+-- Open Currency category. Any type can be a currency.
+
 class Currency cur
 
-data TSMoney currency where
+-- Allows nonsense currencies
+-- instance TS.Currency Bool
+
+data TSMoney a where
 
   MkTSMoney
     :: forall cur
@@ -33,6 +38,7 @@ data TSMoney currency where
     -> TSMoney cur1
     -> TSMoney cur2
 
+  -- Requires manual instances
   -- deriving (Show, Read, Eq, Ord)
 
 
