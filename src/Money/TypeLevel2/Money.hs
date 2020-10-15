@@ -36,41 +36,45 @@ data Currency = USD | EUR
 -- type EUR :: Currency
 
 
-data EnglishAuction holder exchangeService lots lots2
+data EnglishAuction holder exchangeService lots
 
 data Holder name
 
 data ExchangeService name
 
-data Accept (cur :: Currency)
-data Accept2 = Accept2
-
-data Lot (name :: Symbol) (descr :: Symbol) (accepts :: [ Currency ] )
+-- This data type generates implicitly:
+--   kind AcceptTag
+--   type AcceptTag (of kind AcceptTag)   -- compatibility with previous GHC
+--   type 'AcceptTag (of kind AcceptTag)
+data AcceptTag = AcceptTag
 
 -- A way to produce list of types of a predefined kind
--- (We produce list of types of kind Accept2).
+-- (We produce list of types of kind AcceptTag).
 
 -- This can be a base trick for all the type level eDSLs.
-data Lot2 (name :: Symbol) (descr :: Symbol) (accepts :: [ Accept2 ] )
+data Lot (name :: Symbol) (descr :: Symbol) (accepts :: [ AcceptTag ] )
 
--- AcceptTF :: Currency -> Accept2
-type family AcceptTF (a :: Currency) :: Accept2
+-- Accept :: Currency -> AcceptTag
+-- This is an opened Type Family, but we can't add a new currency because
+-- we're limited by the closed data type Currency.
+-- So this type family cannot be considered 'opened' in the extensibility sense,
+-- only in the syntactical sense.
+type family Accept (a :: Currency) :: AcceptTag
 
-type instance AcceptTF 'USD = 'Accept2
-type instance AcceptTF 'EUR = 'Accept2
+type instance Accept 'USD = 'AcceptTag
+type instance Accept 'EUR = 'AcceptTag
+
+-- Question: can Accept 'USD and Acceept 'EUR be distinguished on interpreting?
 
 
 type Auctions =
   EnglishAuction
     ( Holder "UK Bank" )
     ( ExchangeService "UK Bank" )
-    ( Lot "201" "Chinesse vase" ( 'USD ': '[] )
+    ( Lot "a" "b" (Accept 'USD ': Accept 'EUR ': '[])
     -- ': Lot "302" "Dali picture" (Accept 'USD ': Accept 'EUR ': '[])
     -- ': Lot "403" "Ancient mechanism"  (Accept 'USD ': '[])
     ': '[]
-    )
-
-    ( Lot2 "a" "b" (AcceptTF 'USD ': AcceptTF 'EUR ': '[])
     )
 
 
