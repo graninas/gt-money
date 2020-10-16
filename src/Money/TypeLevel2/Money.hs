@@ -15,7 +15,7 @@ import           GHC.TypeLits (Symbol)
 
 -- eDSL
 
-data Car (name :: Symbol) (engine :: EngineTag x) (parts :: PartsTag a )
+data Car (name :: Symbol) (engine :: EngineTag x) (parts :: PartsTag a)
 
 data EngineTag a
 
@@ -31,37 +31,51 @@ type family Parts (p :: [*]) :: PartsTag p
 
 -- Implementation
 
-class Eval payload res where
-  eval :: Proxy payload -> IO res
+class Eval tag payload res where
+  eval :: tag -> Proxy payload -> IO res
+
+-- Interpreting of the (engine :: EngineTag x)
+data AsEngine = AsEngine
+
+instance Eval AsEngine FusionMkI () where
+  eval _ _ = undefined
+
+instance Eval AsEngine BrokenEngine () where
+  eval _ _ = undefined
+
+instance (b ~ Engine a, Eval AsEngine a ()) => Eval AsEngine b () where
+  eval _ _ = eval AsEngine (Proxy :: Proxy a)
+
+instance Eval AsEngine engine () => Eval AsEngine (Car name engine parts) () where
+  eval _ _ = eval AsEngine (Proxy :: Proxy engine)
 
 
-instance Eval FusionMkI () where
-  eval _ = undefined
-
-instance Eval BrokenEngine () where
-  eval _ = undefined
-
-instance (b ~ Engine a, Eval a ()) => Eval b () where
-  eval _ = eval (Proxy :: Proxy a)
-
-instance Eval engine () => Eval (Car name engine parts) () where
-  eval _ = eval (Proxy :: Proxy engine)
 
 
-instance Eval '[] () where
-  eval _ = pure ()
+-- Interpreting of the (parts :: PartsTag a)
 
-instance Eval p () => Eval (p ': '[]) () where
-  eval _ = eval (Proxy :: Proxy p)
+data AsPart = AsPart
 
-instance (Eval p (), Eval (x ': ps) ()) => Eval (p ': x ': ps) () where
-  eval _ = do
-    () <- eval (Proxy :: Proxy p)
-    () <- eval (Proxy :: Proxy (x ': ps))
+instance Eval AsPart FusionMkI () where
+  eval _ _ = undefined
+
+instance Eval AsPart BrokenEngine () where
+  eval _ _ = undefined
+
+instance Eval AsPart '[] () where
+  eval _ _ = pure ()
+
+instance Eval AsPart p () => Eval AsPart (p ': '[]) () where
+  eval _ _ = eval AsPart (Proxy :: Proxy p)
+
+instance (Eval AsPart p (), Eval AsPart (x ': ps) ()) => Eval AsPart (p ': x ': ps) () where
+  eval _ _ = do
+    () <- eval AsPart (Proxy :: Proxy p)
+    () <- eval AsPart (Proxy :: Proxy (x ': ps))
     pure ()
 
-instance (b ~ Parts a, Eval a ()) => Eval b () where
-  eval _ = eval (Proxy :: Proxy a)
+instance (b ~ Parts a, Eval AsPart a ()) => Eval AsPart b () where
+  eval _ _ = eval AsPart (Proxy :: Proxy a)
 
 
 
@@ -79,12 +93,12 @@ type MyCar3 = Car "C" (Engine FusionMkI) (Parts '[FusionMkI, BrokenEngine])
 
 runner :: IO ()
 runner = do
-  () <- eval (Proxy :: Proxy (Engine FusionMkI))
-  () <- eval (Proxy :: Proxy (Engine BrokenEngine))
-  () <- eval (Proxy :: Proxy MyCar1)
-  () <- eval (Proxy :: Proxy (Parts '[]))
-  () <- eval (Proxy :: Proxy (Parts '[FusionMkI]))
-  () <- eval (Proxy :: Proxy (Parts '[FusionMkI, BrokenEngine]))
+  () <- eval AsEngine (Proxy :: Proxy (Engine FusionMkI))
+  () <- eval AsEngine (Proxy :: Proxy (Engine BrokenEngine))
+  -- () <- eval (Proxy :: Proxy MyCar1)
+  () <- eval AsPart (Proxy :: Proxy (Parts '[]))
+  () <- eval AsPart (Proxy :: Proxy (Parts '[FusionMkI]))
+  () <- eval AsPart (Proxy :: Proxy (Parts '[FusionMkI, BrokenEngine]))
 
   pure ()
 
