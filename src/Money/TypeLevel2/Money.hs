@@ -46,17 +46,22 @@ class Currency cur
 
 -- Implementation
 
-class Eval dsl payload res where
-  eval :: Proxy dsl -> Proxy payload -> IO res
+class Eval tag payload res where
+  eval :: Proxy tag -> Proxy payload -> IO res
 
 instance Eval AcceptTag accepts (Map Name Amount) => Eval LotTag accepts (Map Name Amount) where
   eval = undefined
 
-type SomeLot = Lot "a" "b" (Accept USD ': Accept EUR ': '[])
 
+-- Type safety: you can't have an empty list of accepted currencies.
+-- instance Eval AcceptTag '[] () where
+  -- eval _ _ = undefined
 
-instance (a ~ Accept b, Currency b) => Eval a b () where
-  eval _ _ = pure ()
+instance Eval AcceptTag (a ': '[]) () where
+  eval _ _ = undefined
+
+instance Eval AcceptTag (b ': a ': as) () where
+  eval _ _ = undefined
 
 -- doesn't work: duplicated instances
 -- instance (a ~ Accept USD) => Eval a () () where
@@ -65,8 +70,33 @@ instance (a ~ Accept b, Currency b) => Eval a b () where
 -- instance (a ~ Accept EUR) => Eval a () () where
 --   eval _ _ = pure ()
 
-someFunc :: IO ()
-someFunc = eval (Proxy :: Proxy (Accept EUR)) (Proxy :: Proxy EUR)
+-- tmp tests
+type SomeLot = Lot "a" "b" (Accept USD ': Accept EUR ': '[])
+
+someFunc6 :: IO ()
+someFunc6 = eval (Proxy :: Proxy AcceptTag) (Proxy :: Proxy (Accept EUR ': Accept USD ': '[]))
+
+-- Type safety: you can't have an empty list of accepted currencies.
+-- someFunc5 :: IO ()
+-- someFunc5 = eval (Proxy :: Proxy AcceptTag) (Proxy :: Proxy '[])
+
+someFunc4 :: IO ()
+someFunc4 = eval (Proxy :: Proxy AcceptTag) (Proxy :: Proxy (Accept EUR ': Accept USD ': '[]))
+
+someFunc3 :: IO ()
+someFunc3 = eval (Proxy :: Proxy AcceptTag) (Proxy :: Proxy (Accept EUR ': '[]))
+
+-- Useless
+-- instance Eval '[] b () where
+--   eval _ _ = pure ()
+-- someFunc2 :: IO ()
+-- someFunc2 = eval (Proxy :: Proxy ('[])) (Proxy :: Proxy ())
+
+-- Redundant
+-- instance (a ~ Accept cur, Currency cur) => Eval a cur () where
+--   eval _ _ = pure ()
+-- someFunc1 :: IO ()
+-- someFunc1 = eval (Proxy :: Proxy (Accept EUR)) (Proxy :: Proxy EUR)
 
 -- instance Eval accepts (Map Name Amount) => Eval (Lot name descr accepts) (Map Name Amount) where
 --   eval = undefined
